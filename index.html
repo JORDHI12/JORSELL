@@ -1,0 +1,2066 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Jorsell — DigiMarket (Dengan Afiliasi)</title>
+  <meta name="description" content="Jorsell - DigiMarket: Marketplace Produk Digital No.1 untuk Kreator dan Pembeli Cerdas. Termasuk fitur afiliasi (simulasi offline).">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  </head>
+  <body>
+    <script>
+      // Gunakan tanda kutip untuk URL dan KEY
+      const SUPABASE_URL =         "https://dukipkyrhvvoaxjtlazf.supabase.co;
+      const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1a2lwa3lyaHZ2b2F4anRsYXpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3OTkzNTYsImV4cCI6MjA3NzM3NTM1Nn0._b24puVhVXXe7hAHfng_FLHSxrZK9_LfCoXa0Jvwfj8"; // gunakan anon key
+      
+      // Inisialisasi client Supabase
+      const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+      // Tes koneksi
+      console.log("Supabase siap digunakan!");
+    </script>
+  <style>
+    /* ===== Colors & Theme ===== */
+    :root{
+      --accent:#7A3EB1; /* Shopee-like orange */
+      --accent-600:#7A3EB1;
+      --bg:#ffffff;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --muted-2:#9ca3af;
+      --glass: rgba(173,216,230,0.2);
+      --success:#16a34a;
+      --danger:#ef4444;
+      --shadow: 0 6px 18px rgba(15,23,42,0.08);
+      --radius:14px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    [data-theme="dark"]{
+      --bg:#0b1220;
+      --card:#071023;
+      --text:#e6eef8;
+      --muted:#9aa4b2;
+      --muted-2:#6b7785;
+      --glass: rgba(255,255,255,0.04);
+      --shadow: 0 8px 28px rgba(1,6,14,0.6);
+    }
+
+    /* ===== Base Layout ===== */
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:linear-gradient(180deg,var(--bg),#F8F4FF);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      display:flex;
+      flex-direction:column;
+      min-height:100vh;
+      overflow:hidden;
+    }
+    .app{
+      flex:1 1 auto;
+      display:flex;
+      flex-direction:column;
+      max-width:1100px;
+      margin:0 auto;
+      width:100%;
+      height:100%;
+      position:relative;
+    }
+    header.appbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:12px 16px;
+      background:var(--card);
+      box-shadow:var(--shadow);
+      z-index:40;
+    }
+    header .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .logo{
+      width:44px;height:44px;border-radius:10px;background:linear-gradient(180deg,var(--accent),#7A3EB1);
+      display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px;
+      box-shadow:0 6px 18px rgba(255,106,0,0.12);
+    }
+    .brand h1{margin:0;font-size:16px}
+    .brand p{margin:0;font-size:11px;color:var(--muted)}
+    .searchbar{
+      flex:1;margin:0 12px;display:flex;background:var(--glass);padding:8px;border-radius:12px;align-items:center;gap:8px;
+    }
+    .searchbar input{
+      border:0;background:transparent;outline:none;font-size:14px;color:var(--text);width:100%;
+    }
+    .icon-btn{background:transparent;border:0;padding:8px;border-radius:10px;cursor:pointer}
+    .badge{background:var(--accent);color:white;padding:3px 8px;border-radius:999px;font-size:12px}
+    main.screen{
+      flex:1 1 auto;
+      overflow:auto;
+      padding:14px;
+      -webkit-overflow-scrolling:touch;
+    }
+
+    /* Cards and lists */
+    .card{
+      background:var(--card);
+      border-radius:14px;
+      box-shadow:var(--shadow);
+      padding:12px;
+    }
+    .banner{
+      display:flex;gap:12px;align-items:center;padding:14px;border-radius:12px;
+      background:linear-gradient(90deg, rgba(255,234,220,0.9), rgba(255,255,255,0.12));
+      overflow:hidden;
+    }
+    .banner h2{margin:0;font-size:18px}
+    .banner p{margin:0;color:var(--muted);font-size:13px}
+
+    .categories{display:flex;gap:10px;margin-top:12px;overflow:auto;padding-bottom:6px}
+    .cat{min-width:92px;padding:10px;border-radius:12px;background:var(--glass);text-align:center;cursor:pointer}
+    .cat.active{background:linear-gradient(180deg,var(--accent),#7A3EB1);color:white}
+
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px}
+    .prod{
+      border-radius:12px;overflow:hidden;display:flex;flex-direction:column;gap:8px;padding:8px;
+      transition:transform .18s ease, box-shadow .18s ease;cursor:pointer;
+    }
+    .prod:hover{transform:translateY(-6px)}
+    .thumb{height:120px;border-radius:10px;background:linear-gradient(180deg,#f8fafc,#f1f5f9);display:flex;align-items:center;justify-content:center;font-weight:600;color:var(--muted-2)}
+    .p-title{font-size:14px;margin:0;line-height:1.2}
+    .p-meta{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--muted)}
+
+    /* Bottom nav */
+    nav.bottom-nav{
+      position:sticky;bottom:0;left:0;right:0;padding:8px;background:var(--card);display:flex;justify-content:space-around;box-shadow:0 -10px 30px rgba(2,6,23,0.06);
+      z-index:50;border-top-left-radius:16px;border-top-right-radius:16px;
+    }
+    .nav-item{display:flex;flex-direction:column;align-items:center;font-size:11px;color:var(--muted);gap:6px;padding:8px;border-radius:10px}
+    .nav-item.active{color:var(--accent);font-weight:600}
+
+    /* Modal / Drawer */
+    .drawer{position:fixed;inset:0;display:none;align-items:flex-end;justify-content:center;z-index:120}
+    .drawer.show{display:flex}
+    .drawer .panel{width:100%;max-height:85vh;background:var(--card);border-top-left-radius:16px;border-top-right-radius:16px;padding:16px;overflow:auto;box-shadow:var(--shadow)}
+    .row{display:flex;gap:12px;align-items:center}
+    .space{flex:1}
+    button.btn{background:var(--accent);color:white;border:0;padding:10px 14px;border-radius:12px;cursor:pointer;font-weight:600}
+    button.ghost{background:transparent;border:1px solid rgba(0,0,0,0.06);padding:8px;border-radius:10px}
+    .muted{color:var(--muted);font-size:13px}
+
+    /* Product page */
+    .product-page .hero{display:flex;flex-direction:column;gap:12px}
+    .preview{height:220px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .meta{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .rating{display:inline-flex;align-items:center;gap:6px;background:rgba(255,235,205,0.6);padding:6px;border-radius:10px;font-weight:600}
+
+    /* Forms */
+    label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+    input[type="text"], input[type="email"], input[type="number"], textarea, select{
+      width:100%;padding:10px;border-radius:10px;border:1px solid rgba(0,0,0,0.06);background:transparent;color:var(--text);outline:none;
+    }
+    textarea{min-height:100px;resize:vertical}
+
+    /* Chat */
+    .chat-window{display:flex;flex-direction:column;gap:8px;height:60vh}
+    .msg{max-width:80%;padding:10px;border-radius:12px}
+    .msg.me{align-self:flex-end;background:linear-gradient(180deg,#ffeedf,#ffd3a1)}
+    .msg.them{align-self:flex-start;background:var(--glass)}
+
+    /* small screens tweaks */
+    @media(min-width:720px){
+      .grid{grid-template-columns:repeat(3,1fr)}
+      .banner{border-radius:14px}
+      nav.bottom-nav{display:none} /* on large, we show top nav actions */
+      header.appbar{border-radius:0 0 14px 14px}
+      body{background:linear-gradient(180deg,var(--bg),#f8fafc)}
+    }
+
+    /* smooth transitions */
+    *{transition:background-color .18s ease,color .18s ease,transform .12s ease}
+    a{color:inherit;text-decoration:none}
+    footer{font-size:12px;color:var(--muted);padding:10px;text-align:center}
+    .small{font-size:12px;color:var(--muted)}
+    .aff-balance{font-weight:800;font-size:16px;color:var(--success)}
+  </style>
+</head>
+<body>
+  <div class="app" id="app" data-theme="">
+    <header class="appbar">
+      <div class="brand">
+        <div class="logo" aria-hidden> D </div>
+        <div>
+          <h1 id="site-name">Jorsell</h1>
+          <p id="site-tagline">DigiMarket — Marketplace Produk Digital No.1</p>
+        </div>
+      </div>
+
+      <div class="searchbar" role="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35" stroke="#6b7280" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="11" cy="11" r="6" stroke="#6b7280" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <input id="global-search" placeholder="Cari produk, kursus, template..." />
+        <button class="icon-btn" id="btn-theme" title="Toggle dark mode" aria-label="Toggle dark mode">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" id="theme-icon"><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M1 12h2M21 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4" stroke="#374151" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px">
+        <button id="btn-notif" class="icon-btn" title="Notifikasi"><span class="badge" id="notif-count" style="display:none">0</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 17H9a3 3 0 01-3-3V10a5 5 0 0110 0v4a3 3 0 01-1 2z" stroke="#374151" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="#374151" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+
+        <button id="btn-login" class="icon-btn" title="Login / Profil">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 20a8 8 0 0116 0" stroke="#374151" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="screen" id="main">
+      <!-- Home Screen -->
+      <section id="home" class="screen-section">
+        <div class="card banner">
+          <div style="flex:1">
+            <h2>Promo Spesial Kreator</h2>
+            <p>Diskon hingga 30% untuk paket kursus dan template premium. Gratis ongkir file digital 😉</p>
+            <div style="margin-top:10px;display:flex;gap:8px"><button 
+              <button class="btn" id="cta-explore">Jelajahi Sekarang</button>
+              <button class="ghost" id="cta-become-seller">Jadi Penjual</button>
+            </div>
+            <div style="margin-top:8px" id="affiliate-banner" class="small" aria-live="polite"></div>
+          </div>
+          <div style="width:140px;display:flex;flex-direction:column;align-items:flex-end">
+            <div style="background:linear-gradient(180deg,#fff4e6,#fffaf0);padding:8px;border-radius:10px">🔥 Top Picks</div>
+            <div style="height:14px"></div>
+            <div style="font-size:13px;color:var(--muted)"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong>Kategori</strong>
+            <a href="#" id="view-all-cats" class="muted">Lihat semua</a>
+          </div>
+          <div class="categories" id="category-list">
+            <!-- categories injected -->
+          </div>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:12px">
+          <div style="flex:1" class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <strong>Produk Terbaru</strong>
+              <a href="#" class="muted" id="see-more-new">Lainnya</a>
+            </div>
+            <div id="new-products" class="grid" style="margin-top:10px"></div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong>Produk Populer</strong>
+            <a href="#" class="muted" id="see-more-pop">Lainnya</a>
+          </div>
+          <div id="popular-products" class="grid" style="margin-top:10px"></div>
+        </div>
+      </section>
+
+      <!-- Category Screen -->
+      <section id="categories-screen" class="screen-section" style="display:none">
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong>Kategori</strong>
+            <a href="#" class="muted" id="search-in-cat">Cari</a>
+          </div>
+          <div style="margin-top:10px" id="category-grid"></div>
+        </div>
+      </section>
+
+      <!-- Product Screen -->
+      <section id="product-screen" class="screen-section" style="display:none">
+        <div class="card product-page" id="product-detail">
+          <!-- dynamically filled -->
+        </div>
+      </section>
+
+      <!-- Cart Screen -->
+      <section id="cart-screen" class="screen-section" style="display:none">
+        <div class="card">
+          <h3>Keranjang</h3>
+          <div id="cart-list" style="margin-top:12px"></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+            <div>
+              <div class="muted">Total</div>
+              <div style="font-size:18px;font-weight:700" id="cart-total">Rp0</div>
+            </div>
+            <div>
+              <button class="btn" id="btn-checkout">Checkout</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chat Screen -->
+      <section id="chat-screen" class="screen-section" style="display:none">
+        <div class="card">
+          <h3>Chat</h3>
+          <div id="chat-list" style="margin-top:12px"></div>
+          <div style="margin-top:10px;display:flex;gap:8px"></button> </button> 
+            <input id="chat-input" placeholder="Ketik pesan ke penjual..." />
+            <button class="btn" id="send-msg">Kirim</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Profile Screen -->
+      <section id="profile-screen" class="screen-section" style="display:none">
+        <div class="card">
+          <div style="display:flex;gap:12px;align-items:center">
+            <div style="width:64px;height:64px;border-radius:12px;background:var(--glass);display:flex;align-items:center;justify-content:center;font-weight:700">U</div>
+            <div>
+              <div id="profile-name" style="font-weight:700">Tamu</div>
+              <div id="profile-email" class="muted">belum login</div>
+            </div>
+            <div class="space"></div>
+            <div style="text-align:right">
+              <div class="muted">Saldo</div>
+              <div id="profile-balance" style="font-weight:700">Rp0</div>
+              <div class="small">Saldo Afiliasi: <span id="profile-aff-balance" class="aff-balance">Rp0</span></div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:10px;margin-top:12px">
+            <button class="btn" id="btn-become-seller">Jadi Penjual</button>
+            <button class="ghost" id="btn-logout">Logout</button>
+          <div style="margin-top:12px;display:flex;gap:8px"><button class="btn" id="btn-withdraw-seller-profile">Tarik saldo </button></div>
+          </div>
+
+          <hr style="margin:14px 0;border:none;height:1px;background:linear-gradient(90deg,transparent,rgba(0,0,0,0.06),transparent)">
+
+          <div>
+            <strong>Kelola Toko</strong>
+            <div class="muted" style="margin-top:6px">Upload & pantau produk digital Anda</div>
+            <div style="margin-top:10px">
+              <button class="btn" id="open-seller">Buka Panel Penjual</button>
+            </div>
+          </div>
+
+          <hr style="margin:14px 0;border:none;height:1px;background:linear-gradient(90deg,transparent,rgba(0,0,0,0.06),transparent)">
+
+          <div>
+            <strong>Program Afiliasi</strong>
+            <div class="muted" style="margin-top:6px">Dapatkan 10% dari setiap penjualan yang berasal dari link afiliasi Anda.</div>
+            <div style="margin-top:10px;display:flex;gap:8px;align-items:center">
+              <button class="btn" id="btn-join-aff">Gabung Afiliasi</button>
+              <button class="ghost" id="btn-view-aff">Lihat Dashboard Afiliasi</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Affiliate Screen -->
+      <section id="affiliate-screen" class="screen-section" style="display:none">
+        <div class="card">
+          <h3>Dashboard Afiliasi</h3>
+          <div id="aff-content" style="margin-top:8px">
+            <!-- dynamically filled -->
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button class="btn" id="btn-copy-aff-link">Salin Link Afiliasi</button>
+            <button class="ghost" id="btn-export-aff">Export Riwayat (JSON)</button>
+            <button class="ghost" id="btn-back-to-profile">Kembali</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Seller Screen -->
+      <section id="seller-screen" class="screen-section" style="display:none">
+        <div class="card">
+          <h3>Panel Penjual</h3>
+          <div class="muted">Upload produk digital, kelola listing dan lihat statistik.</div>
+
+          <hr style="margin:12px 0;border:none;height:1px;background:linear-gradient(90deg,transparent,rgba(0,0,0,0.06),transparent)">
+
+          <div>
+            <label>File Produk (pdf, zip, mp3, mp4 dll.)</label>
+            <input type="file" id="file-upload" />
+            <label style="margin-top:8px">Judul Produk</label>
+            <input type="text" id="prod-title" placeholder="Contoh: Template Website Minimal" />
+            <label style="margin-top:8px">Kategori</label>
+            <select id="prod-cat">
+              <option value="Ebook">Ebook</option>
+              <option value="Template">Template</option>
+              <option value="Musik">Musik</option>
+              <option value="Desain">Desain</option>
+              <option value="Software">Software</option>
+              <option value="Kursus">Kursus</option>
+            </select>
+            <label style="margin-top:8px">Harga (IDR)</label>
+            <input type="number" id="prod-price" placeholder="50000" />
+            <label style="margin-top:8px">Deskripsi</label>
+            <textarea id="prod-desc" placeholder="Deskripsi singkat"></textarea>
+            <div style="margin-top:10px;display:flex;gap:8px"><button class="ghost" data-removed="btn-withdraw-seller">Tarik Saldo Penjual</button> 
+              <button class="btn" id="submit-product">Upload Produk</button>
+              <button class="ghost" id="export-products">Export (JSON)</button>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <strong>Daftar Produk Anda</strong>
+            <div id="seller-products" style="margin-top:8px"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Checkout / Simulation Drawer -->
+      
+      <!-- Withdraw Seller Modal (profile-only, slide-up) -->
+      <div id="withdraw-overlay" class="drawer" aria-hidden>
+        <div class="panel card" role="dialog" id="withdraw-panel" style="max-height:640px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong>Tarik Saldo Penjual</strong>
+            <button class="icon-btn" id="withdraw-close">✕</button>
+          </div>
+          <div style="margin-top:12px">
+            <p class="muted">Masukkan data rekening Anda untuk menerima penarikan. Data akan disimpan secara lokal (simulasi).</p>
+            <label style="margin-top:8px">Nama Bank</label>
+            <input type="text" id="withdraw-bank-name" placeholder="Contoh: BCA / BRI / Mandiri" />
+            <label style="margin-top:8px">Nomor Rekening</label>
+            <input type="text" id="withdraw-bank-account" placeholder="Nomor Rekening (tanpa spasi)" />
+            <label style="margin-top:8px">Nama Pemilik Rekening</label>
+            <input type="text" id="withdraw-bank-owner" placeholder="Nama sesuai rekening" />
+            <div style="margin-top:12px;display:flex;gap:8px;justify-content:space-between;align-items:center">
+              <div class="muted">Minimal penarikan: Rp50.000</div>
+              <div style="display:flex;gap:8px">
+                <button class="ghost" id="withdraw-save-bank">Simpan Rekening</button>
+                <button class="btn" id="withdraw-confirm" style="background:var(--accent);color:white">Konfirmasi Penarikan</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+<div id="drawer" class="drawer" aria-hidden>
+        <div class="panel card" role="dialog">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong>Checkout</strong>
+            <button class="icon-btn" id="close-drawer">✕</button>
+          </div>
+          <div id="checkout-body" style="margin-top:12px"></div>
+        </div>
+      </div>
+
+      <!-- Simple modal for login -->
+      <div id="modal" class="drawer" aria-hidden>
+        <div class="panel card" style="max-height:640px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <strong>Login / Register</strong>
+            <button class="icon-btn" id="close-modal">✕</button>
+          </div>
+          <div style="margin-top:12px">
+            <label>Email</label>
+            <input type="email" id="login-email" placeholder="email@contoh.com" />
+            <label style="margin-top:8px">Password</label>
+            <input type="text" id="login-pass" placeholder="password" />
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button class="btn" id="btn-do-login">Login</button>
+              <button class="ghost" id="btn-do-register">Register</button>
+            </div>
+
+            <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+              <div style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(0,0,0,0.06),transparent)"></div>
+              <div class="muted">atau</div>
+              <div style="flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(0,0,0,0.06),transparent)"></div>
+            </div>
+
+            <div style="margin-top:10px;display:flex;gap:8px"><button 
+              <button class="btn" id="btn-google">Login dengan Google</button>
+              <button class="ghost" id="btn-guest">Masuk sebagai Tamu</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <nav class="bottom-nav" aria-label="Navigasi utama">
+      <div class="nav-item active" data-target="home" id="nav-home">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 11.5L12 4l9 7.5V20a1 1 0 01-1 1h-6v-6H10v6H4a1 1 0 01-1-1V11.5z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div>Beranda</div>
+      </div>
+      <div class="nav-item" data-target="categories-screen" id="nav-cats">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <div>Kategori</div>
+      </div>
+      <div class="nav-item" data-target="cart-screen" id="nav-cart">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 6h15l-1.5 9h-12z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="20" r="1" /><circle cx="18" cy="20" r="1" /></svg>
+        <div>Keranjang</div>
+      </div>
+      <div class="nav-item" data-target="chat-screen" id="nav-chat">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div>Chat</div>
+      </div>
+      <div class="nav-item" data-target="profile-screen" id="nav-profile">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 20a8 8 0 0116 0" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div>Profil</div>
+      </div>
+    </nav>
+
+    <footer style="padding-bottom:5px">
+      <small>&copy; <span id="copyright-year"></span> jorsell — DigiMarket</small>
+    </footer>
+  </div>
+
+  <script>
+    /* ===== App Data & Utilities ===== */
+    const CATEGORIES = ['Ebook','Template','Musik','Desain','Software','Kursus'];
+    const APP = {
+      name: 'Jorsell',
+      brand: 'DigiMarket',
+      tagline: 'Marketplace Produk Digital No.1 untuk Kreator dan Pembeli Cerdas.',
+      currency: 'IDR',
+      affiliateRate: 0.10 // 10%
+    };
+
+    // Utilities
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => Array.from(document.querySelectorAll(sel));
+    const fmt = n => {
+      if (typeof n !== 'number') n = Number(n) || 0;
+      return 'Rp' + n.toLocaleString('id-ID');
+    };
+    const uid = () => 'id' + Math.random().toString(36).slice(2,9);
+
+    // sample products (kept same)
+    const SAMPLE_PRODUCTS = [
+      {id:uid(),title:'Ebook: Panduan Startup untuk Kreator',cat:'Ebook',price:49000,desc:'Langkah demi langkah membangun startup kreatif.',rating:4.7,downloads:120,thumb:'EBOOK',featured:true,published:Date.now()-1000*60*60*24*2},
+      {id:uid(),title:'Template Landing Page Minimal',cat:'Template',price:75000,desc:'Template HTML/CSS modern & responsif.',rating:4.9,downloads:340,thumb:'TPL',featured:true,published:Date.now()-1000*60*60*24*9},
+      {id:uid(),title:'Paket Musik Latar (Loop Pack)',cat:'Musik',price:29900,desc:'Royalty-free loops untuk video & game.',rating:4.5,downloads:99,thumb:'MUSIC',featured:false,published:Date.now()-1000*60*60*24*1},
+      {id:uid(),title:'Desain Logo All-in-One',cat:'Desain',price:120000,desc:'File AI, SVG, PNG, JPG siap pakai.',rating:4.6,downloads:45,thumb:'LOGO',featured:false,published:Date.now()-1000*60*60*24*12},
+      {id:uid(),title:'Plugin Productivity v2.3',cat:'Software',price:150000,desc:'Plugin untuk editor teks favoritmu.',rating:4.3,downloads:210,thumb:'PLG',featured:true,published:Date.now()-1000*60*60*24*6},
+      {id:uid(),title:'Kursus: Desain UI Modern',cat:'Kursus',price:350000,desc:'Kursus lengkap + proyek real-world.',rating:4.8,downloads:88,thumb:'COURSE',featured:true,published:Date.now()-1000*60*60*24*30}
+    ];
+
+    // localStorage keys
+    const LS = {
+      products: 'jorsell_products_v1',
+      cart: 'jorsell_cart_v1',
+      user: 'jorsell_user_v1',
+      chats: 'jorsell_chats_v1',
+      notifs: 'jorsell_notifs_v1',
+      affiliates: 'jorsell_affiliates_v1', // NEW: store affiliates registry
+      ref_key: 'jorsell_pending_ref_v1', // NEW: store pending referral info for visitor
+      aff_tx: 'jorsell_aff_tx_v1' // NEW: affiliate transactions log
+    };
+
+    // Initialize storage if empty
+    function loadOrInit(){
+      if(!localStorage.getItem(LS.products)) localStorage.setItem(LS.products, JSON.stringify(SAMPLE_PRODUCTS));
+      if(!localStorage.getItem(LS.cart)) localStorage.setItem(LS.cart, JSON.stringify([]));
+      if(!localStorage.getItem(LS.chats)) localStorage.setItem(LS.chats, JSON.stringify([]));
+      if(!localStorage.getItem(LS.notifs)) localStorage.setItem(LS.notifs, JSON.stringify([]));
+      if(!localStorage.getItem(LS.user)) localStorage.setItem(LS.user, JSON.stringify({logged:false}));
+      if(!localStorage.getItem(LS.affiliates)) localStorage.setItem(LS.affiliates, JSON.stringify([]));
+      if(!localStorage.getItem(LS.aff_tx)) localStorage.setItem(LS.aff_tx, JSON.stringify([]));
+    }
+
+    function getProducts(){ return JSON.parse(localStorage.getItem(LS.products)||'[]'); }
+    function setProducts(arr){ localStorage.setItem(LS.products, JSON.stringify(arr)); }
+    function getCart(){ return JSON.parse(localStorage.getItem(LS.cart)||'[]'); }
+    function setCart(arr){ localStorage.setItem(LS.cart, JSON.stringify(arr)); updateCartCount(); }
+    function getUser(){ return JSON.parse(localStorage.getItem(LS.user)||'{}'); }
+    function setUser(u){ localStorage.setItem(LS.user, JSON.stringify(u)); renderProfile(); }
+    function getChats(){ return JSON.parse(localStorage.getItem(LS.chats)||'[]'); }
+    function setChats(c){ localStorage.setItem(LS.chats, JSON.stringify(c)); }
+    function getNotifs(){ return JSON.parse(localStorage.getItem(LS.notifs)||'[]'); }
+    function setNotifs(n){ localStorage.setItem(LS.notifs, JSON.stringify(n)); updateNotifCount(); }
+    function getAffiliates(){ return JSON.parse(localStorage.getItem(LS.affiliates)||'[]'); }
+    function setAffiliates(a){ localStorage.setItem(LS.affiliates, JSON.stringify(a)); }
+    function getPendingRef(){ return JSON.parse(localStorage.getItem(LS.ref_key)||'null'); }
+    function setPendingRef(r){ localStorage.setItem(LS.ref_key, JSON.stringify(r)); }
+    function clearPendingRef(){ localStorage.removeItem(LS.ref_key); }
+    function getAffTx(){ return JSON.parse(localStorage.getItem(LS.aff_tx)||'[]'); }
+    function setAffTx(a){ localStorage.setItem(LS.aff_tx, JSON.stringify(a)); }
+
+    // init
+    loadOrInit();
+
+    /* ===== Affiliate logic (offline simulation) ===== */
+
+    // parse ?ref= from URL on page load and store pending referral
+    function checkUrlForRef(){
+      try {
+        const url = new URL(window.location.href);
+        const ref = url.searchParams.get('ref');
+        if(ref){
+          setPendingRef({refCode: ref, time: Date.now(), url: window.location.href});
+          $('#affiliate-banner').textContent = `Anda membuka situs melalui link afiliasi: ${ref}. Jika melakukan pembelian, pemilik link akan mendapat 10% komisi.`;
+        } else {
+          // if visitor has previous pending ref still valid (24h), show banner
+          const p = getPendingRef();
+          if(p && (Date.now() - p.time) < 1000*60*60*24) {
+            $('#affiliate-banner').textContent = `Anda dapat membantu afiliator "${p.refCode}" jika membeli dalam 24 jam.`;
+          }
+        }
+      } catch(e){}
+    }
+
+    // register current user as affiliate
+    function joinAffiliate(){
+      const user = getUser();
+      if(!user || !user.logged) return alert('Silakan login terlebih dahulu untuk bergabung program afiliasi.');
+      const affs = getAffiliates();
+      // if already affiliate
+      let existing = affs.find(a=>a.ownerEmail===user.email);
+      if(existing) return alert('Anda sudah terdaftar sebagai afiliator. Buka dashboard afiliasi untuk melihat link Anda.');
+      // create refCode from username + random
+      const refCode = (user.name || user.email.split('@')[0]).replace(/\s+/g,'').toLowerCase() + '-' + Math.random().toString(36).slice(2,6);
+      const newAff = {id: uid(), ownerEmail: user.email, ownerName: user.name || user.email, refCode, balance:0, totalEarned:0, created:Date.now()};
+      affs.push(newAff);
+      setAffiliates(affs);
+      alert('Selamat! Anda bergabung program afiliasi.\nLink afiliasi Anda akan muncul di dashboard.');
+      renderAffiliateDashboard();
+    }
+
+    // credit affiliate when purchase happens and pending ref exists
+    function creditAffiliateIfApplicable(totalAmount){
+      const pending = getPendingRef();
+      if(!pending) return null;
+      const affs = getAffiliates();
+      const aff = affs.find(a=>a.refCode === pending.refCode);
+      if(!aff) return null;
+      const user = getUser();
+      // avoid crediting if buyer is the affiliate themself
+      if(user && user.logged && user.email === aff.ownerEmail) {
+        // do not credit self-purchases
+        return null;
+      }
+      const commission = Math.round(totalAmount * APP.affiliateRate);
+      aff.balance = (aff.balance || 0) + commission;
+      aff.totalEarned = (aff.totalEarned || 0) + commission;
+      setAffiliates(affs);
+      // log tx
+      const tx = getAffTx();
+      tx.unshift({id:uid(),refCode:aff.refCode,affiliateId:aff.id,amount:commission,orderAmount:totalAmount,time:Date.now()});
+      setAffTx(tx);
+      // add notification for affiliate if they are current logged in user (simulate)
+      if(getUser().email === aff.ownerEmail){
+        const notifs = getNotifs();
+        notifs.unshift({id:uid(),title:'Komisi Afiliasi Diterima',text:`Anda menerima komisi ${fmt(commission)} dari penjualan ${fmt(totalAmount)}`,time:Date.now()});
+        setNotifs(notifs);
+      }
+      // clear pending ref after credit
+      clearPendingRef();
+      return {affiliate:aff,commission};
+    }
+
+    /* ===== Rendering ===== */
+    const categoryListEl = $('#category-list');
+    const newProductsEl = $('#new-products');
+    const popProductsEl = $('#popular-products');
+    const sellerProductsEl = $('#seller-products');
+
+    function renderCategories(){
+      categoryListEl.innerHTML = '';
+      CATEGORIES.forEach(cat=>{
+        const el = document.createElement('div');
+        el.className='cat';
+        el.dataset.cat = cat;
+        el.innerHTML = `<div style="font-weight:700">${cat}</div><div class="muted" style="font-size:12px">Produk ${cat}</div>`;
+        el.onclick = ()=>{ openCategory(cat) };
+        categoryListEl.appendChild(el);
+      });
+
+      // category grid
+      const grid = $('#category-grid');
+      grid.innerHTML = '';
+      CATEGORIES.forEach(cat=>{
+        const c = document.createElement('div');
+        c.className='card';
+        c.style.marginTop='8px';
+        c.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><div><strong>${cat}</strong><div class="muted">Koleksi ${cat}</div></div><button class="btn" data-cat="${cat}">Lihat</button></div>`;
+        grid.appendChild(c);
+        c.querySelector('button').onclick = ()=>openCategory(cat);
+      });
+    }
+
+    function productCard(p){
+      const el = document.createElement('div');
+      el.className='prod card';
+      el.innerHTML = `
+        <div class="thumb">${p.thumb || p.cat || 'FILE'}</div>
+        <div><p class="p-title">${escapeHTML(p.title)}</p></div>
+        <div class="p-meta"><div>${fmt(p.price)}</div><div style="font-size:12px;color:var(--muted)">${p.rating} ★</div></div>
+      `;
+      el.onclick = ()=>openProduct(p.id);
+      return el;
+    }
+
+    function renderProducts(){
+      const prods = getProducts();
+      // newest by published
+      const newest = prods.slice().sort((a,b)=>b.published - a.published).slice(0,6);
+      newProductsEl.innerHTML = '';
+      newest.forEach(p=> newProductsEl.appendChild(productCard(p)));
+
+      // popular by downloads
+      const popular = prods.slice().sort((a,b)=>b.downloads - a.downloads).slice(0,6);
+      popProductsEl.innerHTML = '';
+      popular.forEach(p=> popProductsEl.appendChild(productCard(p)));
+    }
+
+    function openCategory(cat){
+      const prods = getProducts().filter(p=>p.cat===cat);
+      showScreen('categories-screen');
+      const container = document.createElement('div');
+      container.className='grid';
+      container.style.marginTop='10px';
+      prods.forEach(p=> container.appendChild(productCard(p)));
+      const grid = $('#category-grid');
+      if (grid.children.length>0) grid.removeChild(grid.children[0]);
+      grid.appendChild(container);
+      $$('.cat').forEach(el=>el.classList.toggle('active', el.dataset.cat===cat));
+    }
+
+    function openProduct(id){
+      const p = getProducts().find(x=>x.id===id);
+      if(!p) return alert('Produk tidak ditemukan');
+      showScreen('product-screen');
+      const el = $('#product-detail');
+      el.innerHTML = `
+        <div class="hero">
+          <div class="preview card">${p.thumb || 'FILE'}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <h2 style="margin:0">${escapeHTML(p.title)}</h2>
+              <div class="muted" style="margin-top:6px">${p.cat} • ${p.downloads} unduhan</div>
+            </div>
+            <div class="meta">
+              <div style="text-align:right">
+                <div class="rating">${p.rating} ★</div>
+                <div style="font-weight:800;margin-top:6px">${fmt(p.price)}</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:8px">
+            <button class="btn" id="buy-now">Beli Sekarang</button>
+            <button class="ghost" id="add-cart">Tambah ke Keranjang</button>
+          </div>
+
+          <div style="margin-top:10px">
+            <strong>Deskripsi</strong>
+            <p class="muted">${escapeHTML(p.desc)}</p>
+          </div>
+
+          <div style="margin-top:10px">
+            <strong>Ulasan & Rating</strong>
+            <div id="reviews" style="margin-top:8px">
+              ${renderReviews(p.id)}
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+              <input id="review-input-${p.id}" placeholder="Tinggalkan ulasan..." />
+              <button class="btn" data-prod="${p.id}" onclick="submitReview(event)">Kirim</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      $('#add-cart').onclick = ()=>{ addToCart(p.id); toast('Ditambahkan ke keranjang'); };
+      $('#buy-now').onclick = ()=>{ openCheckout([p]); };
+    }
+
+    function renderReviews(pid){
+      const p = getProducts().find(x=>x.id===pid);
+      const reviews = p.reviews || [];
+      if(!reviews.length) return '<div class="muted">Belum ada ulasan</div>';
+      return reviews.map(r=>`<div style="padding:8px;border-radius:8px;background:var(--glass);margin-top:6px"><strong>${escapeHTML(r.user||'Anon')}</strong> • <span class="muted">${r.rating} ★</span><div style="margin-top:6px">${escapeHTML(r.text)}</div></div>`).join('');
+    }
+
+    window.submitReview = function(e){
+      const prodId = e.target.dataset.prod;
+      const input = document.getElementById('review-input-'+prodId);
+      const text = input.value.trim();
+      if(!text) return toast('Tulis ulasan terlebih dahulu');
+      const pArr = getProducts();
+      const p = pArr.find(x=>x.id===prodId);
+      p.reviews = p.reviews || [];
+      p.reviews.unshift({user:getUser().email||'Tamu',text,rating:(Math.random()*1.2+4).toFixed(1)});
+      const avg = (p.reviews.reduce((s,r)=>s+Number(r.rating),0)/p.reviews.length).toFixed(1);
+      p.rating = avg;
+      setProducts(pArr);
+      openProduct(prodId);
+      toast('Terima kasih untuk ulasannya!');
+    };
+
+    // Seller panel rendering
+    function renderSellerProducts(){
+      const prods = getProducts();
+      const user = getUser();
+      sellerProductsEl.innerHTML = '';
+      prods.forEach(p=>{
+        const row = document.createElement('div');
+        row.className='card';
+        row.style.marginTop='8px';
+        row.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>${escapeHTML(p.title)}</strong><div class="muted">${p.cat} • ${fmt(p.price)}</div></div>
+          <div style="text-align:right"><div class="muted">Unduh: ${p.downloads}</div><div style="margin-top:6px"><button class="ghost" data-id="${p.id}">Edit</button> <button class="btn" data-id="${p.id}" style="background:#ef4444">Hapus</button></div></div>
+        </div>`;
+        sellerProductsEl.appendChild(row);
+      });
+      sellerProductsEl.querySelectorAll('button').forEach(b=>{
+        b.onclick = (ev)=>{
+          const id = ev.target.dataset.id;
+          if(ev.target.textContent.trim()==='Hapus'){
+            if(confirm('Hapus produk ini?')){
+              const arr = getProducts().filter(x=>x.id!==id);
+              setProducts(arr);
+              renderProducts();
+              renderSellerProducts();
+              toast('Produk dihapus');
+            }
+          } else {
+            toast('Fitur edit disimulasikan (tidak aktif)');
+          }
+        };
+      });
+    }
+
+    /* ===== Cart & Checkout ===== */
+    function addToCart(pid,qty=1){
+      const cart = getCart();
+      const item = cart.find(c=>c.id===pid);
+      if(item) item.qty += qty;
+      else cart.push({id:pid,qty});
+      setCart(cart);
+    }
+
+    function updateCartCount(){
+      const cart = getCart();
+      const count = cart.reduce((s,i)=>s+i.qty,0);
+      const nav = $('#nav-cart');
+      if(count) {
+        if(!nav.querySelector('.badge')) {
+          const b = document.createElement('div'); b.className='badge'; b.id='cart-badge';
+          b.style.position='absolute'; b.style.marginTop='-38px'; b.style.marginLeft='38px';
+          b.textContent = count;
+          nav.appendChild(b);
+        } else nav.querySelector('.badge').textContent = count;
+      } else {
+        const b = nav.querySelector('.badge');
+        if(b) b.remove();
+      }
+      renderCart();
+    }
+
+    function renderCart(){
+      const cart = getCart();
+      const prods = getProducts();
+      const list = $('#cart-list');
+      list.innerHTML = '';
+      if(!cart.length) list.innerHTML = '<div class="muted">Keranjang kosong</div>';
+      let total=0;
+      cart.forEach(ci=>{
+        const p = prods.find(x=>x.id===ci.id);
+        if(!p) return;
+        total += p.price * ci.qty;
+        const row = document.createElement('div');
+        row.className='card';
+        row.style.marginTop='8px';
+        row.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>${escapeHTML(p.title)}</strong><div class="muted">${p.cat}</div></div>
+          <div style="text-align:right">
+            <div>${fmt(p.price)} x ${ci.qty}</div>
+            <div style="margin-top:8px"><button class="ghost" data-id="${ci.id}">-</button> <button class="ghost" data-id="${ci.id}">+</button> <button class="ghost" data-id="${ci.id}">Hapus</button></div>
+          </div>
+        </div>`;
+        list.appendChild(row);
+      });
+      $('#cart-total').textContent = fmt(total);
+      list.querySelectorAll('button').forEach(b=>{
+        b.onclick = (ev)=>{
+          const id = ev.target.dataset.id;
+          const action = ev.target.textContent.trim();
+          let c = getCart();
+          const idx = c.findIndex(x=>x.id===id);
+          if(idx<0) return;
+          if(action==='+') c[idx].qty++;
+          else if(action==='-') { c[idx].qty = Math.max(1, c[idx].qty-1); }
+          else if(action==='Hapus') c.splice(idx,1);
+          setCart(c);
+          renderCart();
+        };
+      });
+    }
+
+    function openCheckout(items){
+      let products=[];
+      if(Array.isArray(items) && items.length && items[0].id && items[0].price) products=items;
+      else {
+        const cart = getCart();
+        const prods = getProducts();
+        products = cart.map(ci=> {
+          const p = prods.find(x=>x.id===ci.id);
+          return {...p,qty:ci.qty};
+        });
+      }
+      const total = products.reduce((s,p)=>s + p.price*(p.qty||1),0);
+      $('#drawer').classList.add('show');
+      $('#checkout-body').innerHTML = `<div>
+        <div>
+          ${products.map(p=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0"><div><strong>${escapeHTML(p.title)}</strong><div class="muted">${p.qty || 1} x ${fmt(p.price)}</div></div><div>${fmt((p.qty||1)*p.price)}</div></div>`).join('')}
+        </div>
+        <hr style="margin:10px 0;border:none;height:1px;background:linear-gradient(90deg,transparent,rgba(0,0,0,0.06),transparent)">
+        <div style="display:flex;justify-content:space-between;align-items:center"><strong>Total</strong><div style="font-weight:800">${fmt(total)}</div></div>
+        <div style="margin-top:12px"><strong>Pilih Metode Pembayaran (simulasi)</strong></div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn" id="pay-gopay">Bayar dengan GoPay</button>
+          <button class="ghost" id="pay-card">Kartu</button>
+        </div>
+      </div>`;
+      $('#close-drawer').onclick = ()=>$('#drawer').classList.remove('show');
+      $('#pay-gopay').onclick = ()=>simulatePayment(products,total);
+      $('#pay-card').onclick = ()=>simulatePayment(products,total);
+    }
+
+    function simulatePayment(products,total){
+      $('#checkout-body').innerHTML = `<div style="text-align:center;padding:30px"><div style="font-size:28px" class="muted">Memproses pembayaran…</div></div>`;
+      setTimeout(()=>{
+        const cart = getCart();
+        const prods = getProducts();
+        products.forEach(p=>{
+          const prod = prods.find(x=>x.id===p.id);
+          if(prod){
+            prod.downloads = (prod.downloads||0) + (p.qty||1);
+          }
+        });
+        setProducts(prods);
+        let newCart = cart.filter(ci => !products.some(p=>p.id===ci.id));
+        setCart(newCart);
+        renderProducts(); renderCart(); renderSellerProducts();
+        // affiliate credit
+        const res = creditAffiliateIfApplicable(total);
+        const notifs = getNotifs();
+        notifs.unshift({id:uid(),title:'Pembelian Berhasil',text:`Pembayaran ${fmt(total)} berhasil. File tersedia di akun Anda.`,time:Date.now()});
+        if(res && res.affiliate){
+          notifs.unshift({id:uid(),title:'Afiliasi Terpanggil',text:`Komisi ${fmt(res.commission)} diberikan ke ${res.affiliate.ownerName} (${res.affiliate.refCode}).`,time:Date.now()});
+        }
+        setNotifs(notifs);
+        $('#checkout-body').innerHTML = `<div style="text-align:center;padding:30px"><h3>Berhasil!</h3><p class="muted">Pembayaran berhasil. File digital otomatis tersedia di halaman profil.</p><div style="margin-top:12px"><button class="btn" id="checkout-close">Tutup</button></div></div>`;
+        $('#checkout-close').onclick = ()=>$('#drawer').classList.remove('show');
+      },1200);
+    }
+
+    /* ===== Affiliate Dashboard Rendering ===== */
+    function renderAffiliateDashboard(){
+      const user = getUser();
+      const container = $('#aff-content');
+      const affs = getAffiliates();
+      if(!user.logged){
+        container.innerHTML = `<div class="muted">Silakan login untuk melihat dashboard afiliasi.</div>`;
+        return;
+      }
+      const me = affs.find(a=>a.ownerEmail === user.email);
+      if(!me){
+        container.innerHTML = `<div class="muted">Anda belum terdaftar sebagai afiliator. Klik "Gabung Afiliasi" di profil untuk mendaftar.</div>`;
+        return;
+      }
+      const txs = getAffTx().filter(t=>t.affiliateId===me.id);
+      container.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <strong>Halo, ${escapeHTML(me.ownerName)}</strong>
+            <div class="muted">Ref code: <code>${me.refCode}</code></div>
+            <div class="small">Link afiliasi: <span id="aff-link">${location.origin + location.pathname}?ref=${encodeURIComponent(me.refCode)}</span></div>
+          </div>
+          <div style="text-align:right">
+            <div class="muted">Saldo Afiliasi</div>
+            <div class="aff-balance" id="aff-balance-display">${fmt(me.balance)}</div><div style="margin-top:8px"><button class="btn" id="btn-withdraw-aff">Tarik Saldo Afiliasi</button></div>
+            <div class="small">Total terbayar: ${fmt(me.totalEarned||0)}</div>
+          </div>
+        </div>
+        <hr style="margin:12px 0;border:none;height:1px;background:linear-gradient(90deg,transparent,rgba(0,0,0,0.06),transparent)">
+        <div>
+          <strong>Riwayat Komisi</strong>
+          <div class="muted" style="margin-top:6px">${txs.length? txs.map(t=>`<div style="padding:8px;border-radius:8px;background:var(--glass);margin-top:6px">${new Date(t.time).toLocaleString()} — ${fmt(t.amount)} (Order ${fmt(t.orderAmount)})</div>`).join('') : '<div class="muted">Belum ada komisi</div>'}</div>
+        </div>
+      `;
+    }
+
+    
+    /* ===== Penarikan Saldo (Affiliate & Seller) ===== */
+    const LS_WITHDRAW = 'jorsell_withdraw_tx_v1';
+
+    function getWithdrawTx(){ return JSON.parse(localStorage.getItem(LS_WITHDRAW)||'[]'); }
+    function setWithdrawTx(arr){ localStorage.setItem(LS_WITHDRAW, JSON.stringify(arr)); }
+
+    function withdrawAffiliate(){
+      const user = getUser();
+      if(!user.logged) return alert('Silakan login terlebih dahulu.');
+      const affs = getAffiliates();
+      const me = affs.find(a=>a.ownerEmail===user.email);
+      if(!me) return alert('Anda belum menjadi afiliator.');
+      if(me.balance < 10000) return alert('Saldo afiliasi belum cukup (minimal Rp10.000)');
+      if(!confirm(`Tarik semua saldo (${fmt(me.balance)})?`)) return;
+      const txs = getWithdrawTx();
+      txs.unshift({id:uid(),type:'affiliate',email:user.email,amount:me.balance,time:Date.now()});
+      setWithdrawTx(txs);
+      const notifs = getNotifs();
+      notifs.unshift({id:uid(),title:'Penarikan Afiliasi Berhasil',text:`Penarikan ${fmt(me.balance)} berhasil diproses.`,time:Date.now()});
+      setNotifs(notifs);
+      me.balance = 0;
+      setAffiliates(affs);
+      renderAffiliateDashboard();
+      renderProfile();
+      toast('Penarikan afiliasi berhasil');
+    }
+
+    function withdrawSeller(){
+      const user = getUser();
+      if(!user.logged) return alert('Silakan login terlebih dahulu.');
+      if((user.balance||0) < 50000) return alert('Saldo penjual belum cukup (minimal Rp50.000)');
+      if(!confirm(`Tarik semua saldo (${fmt(user.balance)})?`)) return;
+      const txs = getWithdrawTx();
+      txs.unshift({id:uid(),type:'seller',email:user.email,amount:user.balance,time:Date.now()});
+      setWithdrawTx(txs);
+      const notifs = getNotifs();
+      notifs.unshift({id:uid(),title:'Penarikan Penjual Berhasil',text:`Penarikan ${fmt(user.balance)} berhasil diproses.`,time:Date.now()});
+      setNotifs(notifs);
+      user.balance = 0;
+      setUser(user);
+      renderProfile();
+      toast('Penarikan penjual berhasil');
+    }
+
+
+    /* ===== Chat & Notifications ===== */
+    function renderChats(){
+      const chats = getChats();
+      const el = $('#chat-list');
+      el.innerHTML = '';
+      if(!chats.length) el.innerHTML = '<div class="muted">Belum ada pesan</div>';
+      chats.slice().reverse().forEach(c=>{
+        const row = document.createElement('div');
+        row.className='card';
+        row.style.marginTop='8px';
+        row.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><div><strong>${escapeHTML(c.with || 'Penjual')}</strong><div class="muted">${c.last}</div></div><div><div class="muted">${new Date(c.time).toLocaleString()}</div></div></div>`;
+        row.onclick = ()=>openChatThread(c.with);
+        el.appendChild(row);
+      });
+    }
+
+    function openChatThread(withName){
+      const chats = getChats();
+      const thread = chats.find(c=>c.with===withName);
+      const panel = document.createElement('div');
+      panel.className='card';
+      panel.style.marginTop='8px';
+      panel.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><strong>Chat dengan ${escapeHTML(withName)}</strong><button class="icon-btn" id="close-thread">✕</button></div>
+        <div class="chat-window" id="thread-body" style="margin-top:10px"></div>
+        <div style="display:flex;gap:8px;margin-top:8px"><input id="thread-input" placeholder="Ketik pesan..." /><button class="btn" id="thread-send">Kirim</button></div>`;
+      const el = $('#chat-list');
+      el.innerHTML = '';
+      el.appendChild(panel);
+      $('#close-thread').onclick = ()=>renderChats();
+      function renderThread(){
+        const body = $('#thread-body');
+        body.innerHTML = '';
+        (thread.messages || []).forEach(m=>{
+          const d = document.createElement('div');
+          d.className = 'msg ' + (m.from==='me'?'me':'them');
+          d.textContent = m.text;
+          body.appendChild(d);
+        });
+        body.scrollTop = body.scrollHeight;
+      }
+      $('#thread-send').onclick = ()=>{
+        const txt = $('#thread-input').value.trim();
+        if(!txt) return;
+        thread.messages = thread.messages || [];
+        thread.messages.push({from:'me',text:txt,time:Date.now()});
+        thread.last = txt;
+        setChats(chats);
+        renderThread();
+        $('#thread-input').value='';
+        setTimeout(()=>{
+          thread.messages.push({from:'them',text:'Terima kasih, kami akan bantu!',time:Date.now()});
+          thread.last='Terima kasih, kami akan bantu!';
+          setChats(chats);
+          renderThread();
+        },800);
+      };
+      renderThread();
+    }
+
+    function addChatStub(){
+      const chats = getChats();
+      chats.push({with:'Penjual A',last:'Hai, ada yang bisa dibantu?',time:Date.now(),messages:[{from:'them',text:'Hai, ada yang bisa dibantu?',time:Date.now()}]});
+      setChats(chats);
+      renderChats();
+    }
+
+    function updateNotifCount(){
+      const n = getNotifs();
+      const el = $('#notif-count');
+      if(n.length){
+        el.style.display='inline-block';
+        el.textContent = n.length;
+      } else el.style.display='none';
+    }
+
+    /* ===== Auth Simulation ===== */
+    function renderProfile(){
+      const user = getUser();
+      $('#profile-name').textContent = user.name || 'Tamu';
+      $('#profile-email').textContent = user.email || 'belum login';
+      $('#profile-balance').textContent = fmt(user.balance || 0);
+      const affs = getAffiliates();
+      const me = affs.find(a=>a.ownerEmail === user.email);
+      $('#profile-aff-balance').textContent = me? fmt(me.balance) : fmt(0);
+      $('#btn-login').style.display = user.logged? 'none':'inline-block';
+      $('#btn-logout').style.display = user.logged? 'inline-block':'none';
+    }
+
+    /* ===== Helpers & UI ===== */
+    function showScreen(id){
+      $$('.screen-section').forEach(s=>s.style.display='none');
+      $('#' + id).style.display='block';
+      $$('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.target===id));
+    }
+
+    function toast(msg, timeout=1600){
+      const t = document.createElement('div');
+      t.className='card';
+      t.style.position='fixed';t.style.left='50%';t.style.top='12%';t.style.transform='translateX(-50%)';t.style.zIndex=999;
+      t.style.padding='10px 14px';t.style.borderRadius='12px';t.style.background='var(--card)';
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(()=>t.remove(), timeout);
+    }
+
+    function escapeHTML(s){ if(!s) return ''; return s.replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]); }
+
+    /* ===== Event bindings ===== */
+    
+    // Aktifkan tombol penarikan setelah render
+    function attachWithdrawButtons(){
+      const affBtn = document.getElementById('btn-withdraw-aff');
+      if(affBtn) affBtn.onclick = ()=>withdrawAffiliate();
+      const sellBtn = document.getElementById('btn-withdraw-seller');
+      if(sellBtn) sellBtn.onclick = ()=>withdrawSeller();
+    }
+
+    // Jalankan attach setelah render dashboard atau seller
+    const origRenderAffiliateDashboard = renderAffiliateDashboard;
+    renderAffiliateDashboard = function(){
+      origRenderAffiliateDashboard();
+      attachWithdrawButtons();
+    };
+
+    const origRenderSellerProducts = renderSellerProducts;
+    renderSellerProducts = function(){
+      origRenderSellerProducts();
+      attachWithdrawButtons();
+    };
+
+
+document.addEventListener('DOMContentLoaded',()=>{
+      $('#site-name').textContent = APP.name;
+      $('#site-tagline').textContent = APP.tagline;
+      $('#copyright-year').textContent = new Date().getFullYear();
+
+      renderCategories();
+      renderProducts();
+      renderSellerProducts();
+      renderChats();
+      updateCartCount();
+      updateNotifCount();
+      renderProfile();
+
+      // check for referral in URL
+      checkUrlForRef();
+
+      $$('.nav-item').forEach(n=>{
+        n.onclick = ()=>{ showScreen(n.dataset.target); };
+      });
+
+      $('#global-search').addEventListener('input', (e)=>{
+        const q = e.target.value.trim().toLowerCase();
+        if(!q){ renderProducts(); return; }
+        const hits = getProducts().filter(p=> (p.title+p.desc+p.cat).toLowerCase().includes(q)).slice(0,12);
+        showScreen('home');
+
+      // event listener untuk penarikan saldo
+      const affBtn = document.getElementById('btn-withdraw-aff'); if(affBtn) affBtn.onclick = ()=>withdrawAffiliate();
+      const sellBtn = document.getElementById('btn-withdraw-seller'); if(sellBtn) sellBtn.onclick = ()=>withdrawSeller();
+        newProductsEl.innerHTML = '';
+        popProductsEl.innerHTML = '';
+        if(hits.length===0) newProductsEl.innerHTML = '<div class="muted">Tidak ada hasil</div>';
+        hits.forEach(p=> newProductsEl.appendChild(productCard(p)));
+      });
+
+      $('#cta-explore').onclick = ()=>{ showScreen('categories-screen'); };
+      $('#cta-become-seller').onclick = ()=>{ $('#modal').classList.add('show'); $('#login-email').value=''; $('#login-pass').value=''; };
+
+      $('#btn-login').onclick = ()=> $('#modal').classList.add('show');
+      $('#close-modal').onclick = ()=> $('#modal').classList.remove('show');
+
+      $('#btn-do-login').onclick = ()=>{
+        const email = $('#login-email').value.trim();
+        if(!email) return alert('Masukkan email');
+        const user = {logged:true,email,name: email.split('@')[0],balance:50000,isSeller:false};
+        setUser(user);
+        $('#modal').classList.remove('show');
+        toast('Login berhasil');
+      };
+      $('#btn-do-register').onclick = ()=>{
+        const email = $('#login-email').value.trim();
+        if(!email) return alert('Masukkan email');
+        const user = {logged:true,email,name: email.split('@')[0],balance:25000,isSeller:false};
+        setUser(user);
+        $('#modal').classList.remove('show');
+        toast('Registrasi berhasil');
+      };
+      $('#btn-google').onclick = ()=>{
+        const email = 'user.google@example.com';
+        const user = {logged:true,email,name:'GoogleUser',balance:100000,isSeller:false};
+        setUser(user);
+        $('#modal').classList.remove('show');
+        toast('Login dengan Google (simulasi) berhasil');
+      };
+      $('#btn-guest').onclick = ()=>{
+        setUser({logged:true,email:'guest@example.com',name:'Tamu',balance:0,isSeller:false});
+        $('#modal').classList.remove('show');
+        toast('Masuk sebagai tamu');
+      };
+
+      $('#btn-logout').onclick = ()=>{ setUser({logged:false}); toast('Logout berhasil'); };
+
+      $('#btn-notif').onclick = ()=>{
+        const notifs = getNotifs();
+        if(!notifs.length) return alert('Belum ada notifikasi');
+        alert(notifs.map(n=>`${n.title}\n${n.text}`).join('\n\n'));
+        setNotifs([]);
+      };
+
+      $('#btn-checkout').onclick = ()=> openCheckout();
+
+      $('#open-seller').onclick = ()=> showScreen('seller-screen');
+      $('#btn-become-seller').onclick = ()=>{
+        const u = getUser();
+        u.isSeller = true;
+        setUser(u);
+        toast('Sekarang Anda sudah penjual (simulasi)');
+      };
+
+      $('#submit-product').onclick = ()=>{
+        const file = $('#file-upload').files[0];
+        const title = $('#prod-title').value.trim();
+        const cat = $('#prod-cat').value;
+        const price = Number($('#prod-price').value)||0;
+        const desc = $('#prod-desc').value.trim();
+        if(!title||!file) return alert('Harap isi judul & pilih file.');
+        const arr = getProducts();
+        const p = {id:uid(),title,cat,price,desc,rating:4.5,downloads:0,thumb:file.name.split('.').shift().slice(0,6).toUpperCase(),published:Date.now(),reviews:[]};
+        p.fileName = file.name;
+        arr.unshift(p);
+        setProducts(arr);
+        renderProducts();
+        renderSellerProducts();
+        toast('Produk berhasil diupload (simulasi)');
+        $('#file-upload').value=''; $('#prod-title').value=''; $('#prod-price').value=''; $('#prod-desc').value='';
+      };
+
+      $('#export-products').onclick = ()=>{
+        const blob = new Blob([JSON.stringify(getProducts(),null,2)],{type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'jorsell-products.json'; a.click();
+        URL.revokeObjectURL(url);
+      };
+
+      $('#close-drawer').onclick = ()=>$('#drawer').classList.remove('show');
+
+      $('#nav-cart').onclick = ()=>{ showScreen('cart-screen'); renderCart(); };
+
+      $('#send-msg').onclick = ()=>{
+        const txt = $('#chat-input').value.trim();
+        if(!txt) return;
+        const chats = getChats();
+        chats.push({with:'Penjual A',last:txt,time:Date.now(),messages:[{from:'me',text:txt,time:Date.now()}]});
+        setChats(chats);
+        $('#chat-input').value='';
+        renderChats();
+      };
+
+      addChatStub();
+
+      const themeToggle = $('#btn-theme');
+      themeToggle.onclick = ()=>{
+        const root = document.getElementById('app');
+        const current = root.getAttribute('data-theme') || '';
+        if(current==='dark'){ root.setAttribute('data-theme',''); localStorage.removeItem('theme'); }
+        else { root.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
+      };
+      if(localStorage.getItem('theme')==='dark') document.getElementById('app').setAttribute('data-theme','dark');
+
+      
+document.querySelectorAll('.nav-item').forEach(n=>{
+  n.onclick = (e)=>{
+    const user = getUser();
+
+    // Jika belum login, arahkan ke modal daftar (hanya untuk profil, chat, keranjang)
+    if(!user.logged && ['profile-screen','cart-screen','chat-screen'].includes(n.dataset.target)){
+      $('#modal').classList.add('show');
+      $('#login-email').value = '';
+      $('#login-pass').value = '';
+      return;
+    }
+
+    // Jika sudah login atau menu bebas (home, kategori)
+    showScreen(n.dataset.target);
+    document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+    n.classList.add('active');
+  };
+});
+document.getElementById('see-more-new').onclick = (e)=>{ e.preventDefault(); showScreen('categories-screen'); };
+      document.getElementById('see-more-pop').onclick = (e)=>{ e.preventDefault(); showScreen('categories-screen'); };
+
+      $('#btn-join-aff').onclick = ()=> joinAffiliate();
+      $('#btn-view-aff').onclick = ()=>{
+        renderAffiliateDashboard();
+        showScreen('affiliate-screen');
+      };
+      $('#btn-copy-aff-link').onclick = ()=>{
+        const affs = getAffiliates();
+        const user = getUser();
+        const me = affs.find(a=>a.ownerEmail===user.email);
+        if(!me) return alert('Anda belum terdaftar sebagai afiliator.');
+        const link = location.origin + location.pathname + '?ref=' + encodeURIComponent(me.refCode);
+        navigator.clipboard?.writeText(link).then(()=> toast('Link afiliasi disalin ke clipboard') ).catch(()=> { prompt('Salin link afiliasi ini:', link); });
+      };
+      $('#btn-export-aff').onclick = ()=>{
+        const user = getUser();
+        const affs = getAffiliates();
+        const me = affs.find(a=>a.ownerEmail===user.email);
+        if(!me) return alert('Anda belum terdaftar sebagai afiliator.');
+        const txs = getAffTx().filter(t=>t.affiliateId===me.id);
+        const blob = new Blob([JSON.stringify(txs,null,2)],{type:'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = 'aff-transactions.json'; a.click();
+        URL.revokeObjectURL(url);
+      };
+      $('#btn-back-to-profile').onclick = ()=> showScreen('profile-screen');
+
+      showScreen('home');
+
+      // event listener untuk penarikan saldo
+      const affBtn = document.getElementById('btn-withdraw-aff'); if(affBtn) affBtn.onclick = ()=>withdrawAffiliate();
+      const sellBtn = document.getElementById('btn-withdraw-seller'); if(sellBtn) sellBtn.onclick = ()=>withdrawSeller();
+
+    });
+
+    // keyboard accessibility
+    document.addEventListener('keydown', (e)=>{
+      if(e.key==='/' && document.activeElement.tagName!=='INPUT') { e.preventDefault(); $('#global-search').focus(); }
+    });
+
+  
+    // === Withdraw (Profile-only) enhancements added by assistant ===
+    const LS_SELLER_BANK = 'jorsell_seller_bank_v1';
+    function getSellerBank(){ return JSON.parse(localStorage.getItem(LS_SELLER_BANK)||'null'); }
+    function setSellerBank(b){ localStorage.setItem(LS_SELLER_BANK, JSON.stringify(b)); }
+    function renderSellerBankPreview(){
+      const profileScreen = document.getElementById('profile-screen');
+      if(!profileScreen) return;
+      let preview = document.getElementById('seller-bank-preview');
+      if(!preview){
+        preview = document.createElement('div');
+        preview.id = 'seller-bank-preview';
+        preview.style.marginTop = '12px';
+        profileScreen.querySelector('.card').appendChild(preview);
+      }
+      const b = getSellerBank();
+      if(!b){
+        preview.innerHTML = '<div class=\"muted\">Belum ada rekening penarikan. Klik \"Tarik Saldo Penjual\" untuk menambah.</div>';
+        return;
+      }
+      preview.innerHTML = `<div style="display:flex;justify-content:space-between;align-items:center"><div><strong>${escapeHTML(b.bankName)}</strong><div class="small muted">No. ${escapeHTML(b.account)}</div><div class="small muted">a.n. ${escapeHTML(b.owner)}</div></div><div style="text-align:right"><button class="ghost" id="seller-bank-edit">Ubah</button></div></div>`;
+      const editBtn = document.getElementById('seller-bank-edit');
+      if(editBtn) editBtn.onclick = () => openWithdrawModal();
+    }
+
+    function openWithdrawModal(){
+      const overlay = document.getElementById('withdraw-overlay');
+      if(!overlay) return;
+      overlay.classList.add('show');
+      overlay.removeAttribute('aria-hidden');
+      const b = getSellerBank();
+      if(b){
+        const eln = document.getElementById('withdraw-bank-name');
+        const elacc = document.getElementById('withdraw-bank-account');
+        const elown = document.getElementById('withdraw-bank-owner');
+        if(eln) eln.value = b.bankName || '';
+        if(elacc) elacc.value = b.account || '';
+        if(elown) elown.value = b.owner || '';
+      }
+    }
+    function closeWithdrawModal(){
+      const overlay = document.getElementById('withdraw-overlay');
+      if(!overlay) return;
+      overlay.classList.remove('show');
+      overlay.setAttribute('aria-hidden','true');
+    }
+    function saveWithdrawBankFromForm(){
+      const bankNameEl = document.getElementById('withdraw-bank-name');
+      const accountEl = document.getElementById('withdraw-bank-account');
+      const ownerEl = document.getElementById('withdraw-bank-owner');
+      if(!bankNameEl || !accountEl || !ownerEl) return false;
+      const bankName = bankNameEl.value.trim();
+      const account = accountEl.value.trim();
+      const owner = ownerEl.value.trim();
+      if(!bankName || !account || !owner){ alert('Semua field rekening harus diisi'); return false; }
+      setSellerBank({bankName,account,owner, savedAt: Date.now()});
+      renderSellerBankPreview();
+      alert('Rekening tersimpan (simulasi)');
+      return true;
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+      // attach profile-only withdraw button
+      const profBtn = document.getElementById('btn-withdraw-seller-profile');
+      if(profBtn) profBtn.onclick = ()=> openWithdrawModal();
+      // attach modal buttons
+      const closeBtn = document.getElementById('withdraw-close');
+      if(closeBtn) closeBtn.onclick = ()=> closeWithdrawModal();
+      const saveBtn = document.getElementById('withdraw-save-bank');
+      if(saveBtn) saveBtn.onclick = ()=> saveWithdrawBankFromForm();
+      const confirmBtn = document.getElementById('withdraw-confirm');
+      if(confirmBtn) confirmBtn.onclick = ()=> { if(saveWithdrawBankFromForm()){ try{ withdrawSeller(); }catch(e){ console.error('withdrawSeller not found',e); alert('Fungsi penarikan belum tersedia.'); } } };
+      const overlay = document.getElementById('withdraw-overlay');
+      if(overlay) overlay.addEventListener('click',(e)=>{ if(e.target===overlay) closeWithdrawModal(); });
+      // prefill modal inputs if bank exists
+      const b = getSellerBank();
+      if(b){
+        const eln = document.getElementById('withdraw-bank-name');
+        const elacc = document.getElementById('withdraw-bank-account');
+        const elown = document.getElementById('withdraw-bank-owner');
+        if(eln) eln.value = b.bankName || '';
+        if(elacc) elacc.value = b.account || '';
+        if(elown) elown.value = b.owner || '';
+      }
+      // render preview in profile
+      renderSellerBankPreview();
+    });
+</script>
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const SUPABASE_URL = https://dukipkyrhvvoaxjtlazf.supabase.co;
+  const SUPABASE_ANON = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1a2lwa3lyaHZ2b2F4anRsYXpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3OTkzNTYsImV4cCI6MjA3NzM3NTM1Nn0._b24puVhVXXe7hAHfng_FLHSxrZK9_LfCoXa0Jvwfj8;
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, { realtime: { params: { eventsPerSecond: 10 } }});
+
+  async function fetchWithTimeout(promise, ms = 4500) {
+    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms));
+    return Promise.race([promise, timeout]);
+  }
+
+  async function tryLoadTable(table) {
+    try {
+      const res = await fetchWithTimeout(supabase.from(table).select('*').limit(1000));
+      if (res.error) throw res.error;
+      return res.data || [];
+    } catch (e) {
+      console.warn('[Supabase] failed to load', table, e.message || e);
+      return null;
+    }
+  }
+
+  async function upsertToSupabase(table, rows) {
+    try {
+      const res = await supabase.from(table).upsert(rows);
+      if (res.error) throw res.error;
+      return res.data;
+    } catch (e) {
+      console.warn('[Supabase] upsert failed', table, e.message || e);
+      return null;
+    }
+  }
+
+  function subscribeTable(table, cb) {
+    try {
+      const channel = supabase.channel(table + '-channel')
+        .on('postgres_changes', { event: '*', schema: 'public', table }, payload => {
+          try {
+            cb(payload);
+          } catch(err){ console.error('callback error', err); }
+        })
+        .subscribe(status => {
+          if (status === 'SUBSCRIBED') console.log('[Supabase] subscribed to', table);
+        });
+      return channel;
+    } catch(e) {
+      console.warn('[Supabase] subscribe failed for', table, e);
+      return null;
+    }
+  }
+
+  (async function initSupabaseIntegration(){
+    const waitFor = (name, ms = 3000) => new Promise((res) => {
+      const start = Date.now();
+      (function loop() {
+        if (window[name]) return res(true);
+        if (Date.now() - start > ms) return res(false);
+        setTimeout(loop, 120);
+      })();
+    });
+
+    const ok = await waitFor('getProducts', 4000);
+    if (!ok) {
+      console.warn('[Supabase] original app functions not found — integration aborted to avoid changing UI.');
+      return;
+    }
+
+    const [productsRes, usersRes, affiliatesRes, afftxRes] = await Promise.allSettled([
+      tryLoadTable('products'), tryLoadTable('users'), tryLoadTable('affiliates'), tryLoadTable('aff_tx')
+    ]);
+
+    try {
+      if (productsRes.status === 'fulfilled' && productsRes.value) {
+        const prods = productsRes.value.map(r => ({
+          id: r.id?.toString() || (r.uuid || (r.title && 'sb-' + Math.random().toString(36).slice(2,8))),
+          title: r.title || r.name || 'Untitled',
+          cat: r.category || r.cat || r.cat_name || 'Uncategorized',
+          price: Number(r.price || r.amount || 0),
+          desc: r.description || r.desc || '',
+          rating: Number(r.rating || 4.5),
+          downloads: Number(r.downloads || 0),
+          thumb: r.thumb || r.fileName || (r.title||'').slice(0,6).toUpperCase(),
+          featured: !!r.featured,
+          published: r.published ? new Date(r.published).getTime() : Date.now()
+        }));
+        setProducts(prods);
+      }
+    } catch(e){ console.error(e); }
+
+    try {
+      if (affiliatesRes.status === 'fulfilled' && affiliatesRes.value) {
+        const affs = affiliatesRes.value.map(r => ({
+          id: r.id?.toString() || (r.uuid || 'aff-' + Math.random().toString(36).slice(2,6)),
+          ownerEmail: r.owner_email || r.email || r.ownerEmail,
+          ownerName: r.owner_name || r.ownerName || r.owner,
+          refCode: r.ref_code || r.refCode || r.code,
+          balance: Number(r.balance || 0),
+          totalEarned: Number(r.total_earned || r.totalEarned || 0),
+          created: r.created ? new Date(r.created).getTime() : Date.now()
+        }));
+        setAffiliates(affs);
+      }
+    } catch(e){ console.error(e); }
+
+    try {
+      if (afftxRes.status === 'fulfilled' && afftxRes.value) {
+        const txs = afftxRes.value.map(r => ({
+          id: r.id?.toString() || (r.uuid || 'tx-' + Math.random().toString(36).slice(2,6)),
+          refCode: r.ref_code || r.refCode,
+          affiliateId: r.affiliate_id || r.affiliateId,
+          amount: Number(r.amount || 0),
+          orderAmount: Number(r.order_amount || r.orderAmount || 0),
+          time: r.time ? new Date(r.time).getTime() : Date.now()
+        }));
+        setAffTx(txs);
+      }
+    } catch(e){ console.error(e); }
+
+    try {
+      if (usersRes.status === 'fulfilled' && usersRes.value && usersRes.value.length) {
+        const localUser = getUser();
+        if (localUser && localUser.logged && localUser.email) {
+          const su = usersRes.value.find(u => (u.email||'').toLowerCase() === (localUser.email||'').toLowerCase());
+          if (su) {
+            const merged = Object.assign({}, localUser, {
+              balance: Number(su.balance||localUser.balance||0),
+              name: su.name || localUser.name || su.username || localUser.email.split('@')[0]
+            });
+            setUser(merged);
+          }
+        }
+      }
+    } catch(e){ console.error(e); }
+
+    function safeRender(name) {
+      try {
+        if (name === 'products') renderProducts();
+        else if (name === 'affiliates') renderAffiliateDashboard(), renderProfile();
+        else if (name === 'aff_tx') renderAffiliateDashboard();
+        else if (name === 'users') renderProfile();
+      } catch(e){ console.warn('render error', e); }
+    }
+
+    const subs = [];
+    try {
+      subs.push(subscribeTable('products', payload => {
+        const rec = payload.new || payload.record || payload;
+        if (!rec) return;
+        const prods = getProducts();
+        if (payload.eventType === 'DELETE') {
+          const idx = prods.findIndex(p=>p.id==rec.id);
+          if (idx>=0) prods.splice(idx,1);
+        } else {
+          const p = {
+            id: rec.id?.toString() || (rec.uuid || 'sb-' + Math.random().toString(36).slice(2,8)),
+            title: rec.title || rec.name || 'Untitled',
+            cat: rec.category || rec.cat || 'Uncategorized',
+            price: Number(rec.price||0),
+            desc: rec.description||'',
+            rating: Number(rec.rating||4.5),
+            downloads: Number(rec.downloads||0),
+            thumb: rec.thumb || rec.fileName || (rec.title||'').slice(0,6).toUpperCase(),
+            published: rec.published ? new Date(rec.published).getTime() : Date.now()
+          };
+          const idx = prods.findIndex(x=>x.id==p.id);
+          if (idx>=0) prods[idx] = p; else prods.unshift(p);
+        }
+        setProducts(prods);
+        safeRender('products');
+      }));
+    } catch(e){ console.warn(e); }
+
+    try {
+      subs.push(subscribeTable('affiliates', payload => {
+        const rec = payload.new || payload.record || payload;
+        if(!rec) return;
+        const arr = getAffiliates();
+        if (payload.eventType === 'DELETE') {
+          const i = arr.findIndex(x=>x.id==rec.id); if(i>=0) arr.splice(i,1);
+        } else {
+          const a = {
+            id: rec.id?.toString() || ('aff-' + Math.random().toString(36).slice(2,6)),
+            ownerEmail: rec.owner_email || rec.ownerEmail || rec.email,
+            ownerName: rec.owner_name || rec.ownerName || rec.owner,
+            refCode: rec.ref_code || rec.refCode || rec.code,
+            balance: Number(rec.balance||0),
+            totalEarned: Number(rec.total_earned||0)
+          };
+          const i = arr.findIndex(x=>x.id==a.id);
+          if(i>=0) arr[i]=a; else arr.unshift(a);
+        }
+        setAffiliates(arr);
+        safeRender('affiliates');
+      }));
+    } catch(e){ console.warn(e); }
+
+    try {
+      subs.push(subscribeTable('aff_tx', payload => {
+        const rec = payload.new || payload.record || payload;
+        if(!rec) return;
+        const arr = getAffTx();
+        if (payload.eventType === 'DELETE') {
+          const i = arr.findIndex(x=>x.id==rec.id); if(i>=0) arr.splice(i,1);
+        } else {
+          const t = {
+            id: rec.id?.toString() || ('tx-' + Math.random().toString(36).slice(2,6)),
+            refCode: rec.ref_code || rec.refCode,
+            affiliateId: rec.affiliate_id || rec.affiliateId,
+            amount: Number(rec.amount||0),
+            orderAmount: Number(rec.order_amount||rec.orderAmount||0),
+            time: rec.time ? new Date(rec.time).getTime() : Date.now()
+          };
+          arr.unshift(t);
+        }
+        setAffTx(arr);
+        safeRender('aff_tx');
+      }));
+    } catch(e){ console.warn(e); }
+
+    try {
+      subs.push(subscribeTable('users', payload => {
+        const rec = payload.new || payload.record || payload;
+        if(!rec) return;
+        const local = getUser();
+        if(local && local.logged && local.email && (local.email.toLowerCase() === (rec.email||'').toLowerCase())) {
+          const merged = Object.assign({}, local, { balance: Number(rec.balance||local.balance||0), name: rec.name || local.name });
+          setUser(merged);
+          safeRender('users');
+        }
+      }));
+    } catch(e){ console.warn(e); }
+
+    console.log('[Supabase] integration initialized (non-invasive).');
+
+    if (window.creditAffiliateIfApplicable && typeof window.creditAffiliateIfApplicable === 'function') {
+      const orig = window.creditAffiliateIfApplicable;
+      window.creditAffiliateIfApplicable = function(totalAmount) {
+        const res = orig(totalAmount);
+        try {
+          if (res && res.affiliate) {
+            const a = res.affiliate;
+            upsertToSupabase('affiliates', [{ id: a.id, owner_email: a.ownerEmail, owner_name: a.ownerName, ref_code: a.refCode, balance: a.balance, total_earned: a.totalEarned }]);
+            upsertToSupabase('aff_tx', [{ id: 'tx-' + Math.random().toString(36).slice(2,8), ref_code: a.refCode, affiliate_id: a.id, amount: res.commission, order_amount: totalAmount, time: new Date().toISOString() }]);
+          }
+        } catch(e){ console.warn('[Supabase] best-effort write failed', e); }
+        return res;
+      };
+    }
+
+    const submitBtn = document.getElementById('submit-product');
+    if (submitBtn) {
+      submitBtn.addEventListener('click', async () => {
+        setTimeout(async () => {
+          const latest = getProducts();
+          const toSync = latest.slice(0,6).map(p=>({ id: p.id, title: p.title, category: p.cat, price: p.price, description: p.desc, downloads: p.downloads || 0, thumb: p.thumb, published: new Date(p.published || Date.now()).toISOString() }));
+          await upsertToSupabase('products', toSync);
+        }, 600);
+      });
+    }
+
+    window.addEventListener('beforeunload', () => {
+      try {
+        subs.forEach(ch => { if(ch && ch.unsubscribe) ch.unsubscribe(); });
+      } catch(e){ }
+    });
+
+  })();
+</script>
+
+
+<script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const SUPABASE_URL = "https://trtzgtsebafnpmcgjzqs.supabase.co";
+  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRydHpndHNlYmFmbnBtY2dqenFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0OTA5NjEsImV4cCI6MjA3NzA2Njk2MX0.gzIJTy3InDNISDU6V1wSMzU8xrDcftxNGHymyi6ukhU";
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, { auth: { persistSession: true } });
+  window.supabase = supabase;
+
+  function mapSupabaseUserToLocal(user) {
+    if(!user) return { logged: false };
+    return {
+      logged: true,
+      email: user.email || '',
+      name: user.user_metadata?.full_name || user.user_metadata?.name || (user.email? user.email.split('@')[0] : ''),
+      balance: 0,
+      isSeller: false,
+      supabase_user_id: user.id
+    };
+  }
+
+  supabase.auth.onAuthStateChange((event, session) => {
+    try {
+      const u = session?.user || null;
+      if(u) {
+        (async () => {
+          try {
+            const { data, error } = await supabase.from('users').select('*').eq('email', u.email).limit(1).maybeSingle();
+            if(!error && data) {
+              const local = mapSupabaseUserToLocal(u);
+              local.name = data.name || local.name;
+              local.balance = Number(data.balance || 0);
+              if(typeof setUser === 'function') setUser(local);
+            } else {
+              if(typeof setUser === 'function') setUser(mapSupabaseUserToLocal(u));
+            }
+          } catch(e){ console.warn('[Auth] fetch profile failed', e); if(typeof setUser === 'function') setUser(mapSupabaseUserToLocal(u)); }
+        })();
+      } else {
+        if(typeof setUser === 'function') setUser({ logged: false });
+      }
+    } catch(err){ console.error('[Auth] onAuthStateChange error', err); }
+  });
+
+  function attachAuthHandlers() {
+    const btnRegister = document.getElementById('btn-do-register');
+    if(btnRegister) btnRegister.onclick = async () => {
+      const email = (document.getElementById('login-email') || {}).value?.trim();
+      const password = (document.getElementById('login-pass') || {}).value?.trim();
+      if(!email || !password) return alert('Masukkan email dan password untuk mendaftar.');
+      try {
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if(error) return alert('Registrasi gagal: ' + error.message);
+        alert('Registrasi sukses. Cek email untuk verifikasi (jika diaktifkan).');
+      } catch(e){ console.error(e); alert('Registrasi gagal'); }
+    };
+
+    const btnLogin = document.getElementById('btn-do-login');
+    if(btnLogin) btnLogin.onclick = async () => {
+      const email = (document.getElementById('login-email') || {}).value?.trim();
+      const password = (document.getElementById('login-pass') || {}).value?.trim();
+      if(!email || !password) return alert('Masukkan email dan password untuk login.');
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if(error) return alert('Login gagal: ' + error.message);
+        alert('Login berhasil');
+        const modal = document.getElementById('modal'); if(modal) modal.classList.remove('show');
+      } catch(e){ console.error(e); alert('Login error'); }
+    };
+
+    const btnLogout = document.getElementById('btn-logout');
+    if(btnLogout) btnLogout.onclick = async () => {
+      try {
+        await supabase.auth.signOut();
+        alert('Logout berhasil');
+      } catch(e){ console.warn(e); alert('Logout gagal'); }
+    };
+
+    const btnGoogle = document.getElementById('btn-google');
+    if(btnGoogle) btnGoogle.onclick = async () => {
+      try {
+        await supabase.auth.signInWithOAuth({ provider: 'google' });
+      } catch(e){ console.error(e); alert('Login Google gagal'); }
+    };
+
+    const btnGuest = document.getElementById('btn-guest');
+    if(btnGuest) btnGuest.onclick = () => {
+      setUser({logged:true,email:'guest@example.com',name:'Tamu',balance:0,isSeller:false});
+      const modal = document.getElementById('modal'); if(modal) modal.classList.remove('show');
+      toast('Masuk sebagai tamu');
+    };
+  }
+
+  if(document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(attachAuthHandlers, 50);
+  else document.addEventListener('DOMContentLoaded', attachAuthHandlers);
+
+  window.getSupabaseUser = async function() {
+    try {
+      const { data } = await supabase.auth.getUser();
+      return data?.user || null;
+    } catch(e){ return null; }
+  };
+
+  console.log('[Supabase Auth] initialized (email/password).');
+</script>
+
+
+<script type="module">
+  // This script enhances the Register flow: after signUp it signs in the user (if needed)
+  // and inserts a profile row into public.users. It does not alter UI markup.
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const SUPABASE_URL = "https://trtzgtsebafnpmcgjzqs.supabase.co";
+  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRydHpndHNlYmFmbnBtY2dqenFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0OTA5NjEsImV4cCI6MjA3NzA2Njk2MX0.gzIJTy3InDNISDU6V1wSMzU8xrDcftxNGHymyi6ukhU";
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON, { auth: { persistSession: true } });
+  // Wait until DOM and existing handlers are ready, then override register behaviour
+  function enhanceRegister() {
+    const btnRegister = document.getElementById('btn-do-register');
+    if(!btnRegister) return;
+    btnRegister.onclick = async () => {
+      const emailEl = document.getElementById('login-email') || {};
+      const passEl = document.getElementById('login-pass') || {};
+      const email = (emailEl.value || '').trim();
+      const password = (passEl.value || '').trim();
+      if(!email || !password) return alert('Masukkan email dan password untuk mendaftar.');
+      try {
+        // 1) signUp
+        const { data: signData, error: signErr } = await supabase.auth.signUp({ email, password });
+        if(signErr && signErr.status !== 400) {
+          // status 400 may indicate email already registered; show message
+          return alert('Registrasi gagal: ' + signErr.message);
+        }
+        // If signUp succeeded or user already exists, attempt to sign in to obtain session
+        const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({ email, password });
+        if(signInErr) {
+          // If signIn failed because confirmation required, still warn user
+          console.warn('Sign-in after sign-up failed', signInErr);
+          // still proceed to inform user and not insert profile until authenticated
+          alert('Registrasi berhasil. Jika memerlukan verifikasi email, silakan periksa inbox Anda. Anda mungkin perlu konfirmasi sebelum auto-login.');
+          return;
+        }
+        // Now we have a session and user
+        const supaUser = signInData?.user || signData?.user;
+        if(!supaUser) {
+          alert('Registrasi berhasil, namun tidak dapat otomatis login. Silakan login manual.');
+          return;
+        }
+
+        // 2) Insert profile into public.users table if not exists
+        try {
+          // Check if user already exists in table (by email)
+          const { data: existing, error: findErr } = await supabase.from('users').select('id,email').eq('email', email).limit(1).maybeSingle();
+          if(findErr) console.warn('check users failed', findErr);
+          if(!existing) {
+            const name = email.split('@')[0];
+            const payload = { email, name, balance: 0, is_seller: false };
+            const { data: insertData, error: insertErr } = await supabase.from('users').insert([payload]);
+            if(insertErr) {
+              console.warn('insert users failed', insertErr);
+            } else {
+              console.log('Inserted user profile into DB', insertData);
+            }
+          } else {
+            console.log('User profile already exists in DB');
+          }
+        } catch(e) {
+          console.warn('failed to insert profile', e);
+        }
+
+        // 3) Update local app state using existing setUser() if available
+        try {
+          const local = { logged:true, email: supaUser.email || '', name: supaUser.user_metadata?.full_name || supaUser.user_metadata?.name || (supaUser.email? supaUser.email.split('@')[0] : ''), balance:0, isSeller:false, supabase_user_id: supaUser.id };
+          if(typeof setUser === 'function') {
+            // If server has profile with balance, fetch it
+            try {
+              const { data: profileData, error: profileErr } = await supabase.from('users').select('*').eq('email', supaUser.email).limit(1).maybeSingle();
+              if(!profileErr && profileData) {
+                local.name = profileData.name || local.name;
+                local.balance = Number(profileData.balance || 0);
+                local.isSeller = Boolean(profileData.is_seller || false);
+              }
+            } catch(e){ console.warn('profile fetch failed', e); }
+            setUser(local);
+          }
+        } catch(e) { console.warn('setUser failed', e); }
+
+        // 4) Close modal and show toast
+        const modal = document.getElementById('modal'); if(modal) modal.classList.remove('show');
+        toast('Registrasi berhasil dan Anda telah login.');
+      } catch(err) {
+        console.error('Register+autologin error', err);
+        alert('Terjadi kesalahan saat registrasi: ' + (err.message || err));
+      }
+    };
+  }
+
+  if(document.readyState === 'complete' || document.readyState === 'interactive') setTimeout(enhanceRegister, 100);
+  else document.addEventListener('DOMContentLoaded', enhanceRegister);
+</script>
+
+
+<!-- Supabase integration (minimal: products stored in Supabase; auth via Supabase but mirrored to localStorage) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/bundle.min.js"></script>
+<script>
+(async function(){
+  // Supabase config (from user)
+  const SUPABASE_URL = "https://trtzgtsebafnpmcgjzqs.supabase.co";
+  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRydHpndHNlYmFmbnBtY2dqenFzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE0OTA5NjEsImV4cCI6MjA3NzA2Njk2MX0.gzIJTy3InDNISDU6V1wSMzU8xrDcftxNGHymyi6ukhU";
+  const supabase = supabaseJs.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  // Helper to mirror supabase products into localStorage format used by the app
+  async function syncProductsToLocal(){
+    try{
+      const { data, error } = await supabase.from('products').select('*').order('published', { ascending: false }).limit(200);
+      if(error){ console.error('Supabase fetch products error', error); return; }
+      // Map supabase rows to the app product shape
+      const mapped = (data||[]).map(r=> ({
+        id: r.id || ( 'id'+Math.random().toString(36).slice(2,9) ),
+        title: r.title || r.name || 'Untitled',
+        cat: r.cat || r.category || 'Umum',
+        price: Number(r.price)||0,
+        desc: r.desc || r.description || '',
+        rating: r.rating || 4.5,
+        downloads: r.downloads || 0,
+        thumb: r.thumb || (r.fileName ? r.fileName.split('.').shift().toUpperCase() : r.cat ? r.cat.slice(0,6).toUpperCase() : 'FILE'),
+        featured: r.featured || false,
+        published: r.published ? new Date(r.published).getTime() : Date.now()
+      }));
+      localStorage.setItem('jorsell_products_v1', JSON.stringify(mapped));
+      // re-render app lists that read from localStorage
+      try { if(typeof renderProducts === 'function') renderProducts(); } catch(e){}
+      try { if(typeof renderSellerProducts === 'function') renderSellerProducts(); } catch(e){}
+    }catch(e){ console.error(e); }
+  }
+
+  // Initial sync after DOM is ready
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', syncProductsToLocal);
+  } else syncProductsToLocal();
+
+  // Override upload handler to save file to Supabase Storage and insert row to products table
+  const submitBtn = document.getElementById('submit-product');
+  if(submitBtn){
+    submitBtn.addEventListener('click', async function(e){
+      try{
+        const fileInput = document.getElementById('file-upload');
+        const title = document.getElementById('prod-title').value.trim();
+        const cat = document.getElementById('prod-cat').value;
+        const price = Number(document.getElementById('prod-price').value) || 0;
+        const desc = document.getElementById('prod-desc').value.trim();
+        const file = fileInput.files && fileInput.files[0];
+        // we require login via app's existing simulation; try to get logged user from localStorage
+        const user = JSON.parse(localStorage.getItem('jorsell_user_v1')||'{}');
+        if(!user || !user.logged){
+          alert('Silakan login terlebih dahulu untuk upload produk.');
+          return;
+        }
+        if(!file || !title){
+          alert('Harap isi judul & pilih file.');
+          return;
+        }
+        // Upload file to 'products' bucket (must exist)
+        const path = `${user.email}/${Date.now()}_${file.name}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage.from('products').upload(path, file, { upsert: false });
+        if(uploadError && uploadError.message && uploadError.status !== 409){
+          console.error('Upload error', uploadError);
+          alert('Gagal upload file: ' + uploadError.message);
+          return;
+        }
+        // Insert product metadata to supabase table
+        const { error: insertErr } = await supabase.from('products').insert([{
+          title, cat, price, desc, rating:4.5, downloads:0, thumb: file.name, published: new Date().toISOString(), owner_email: user.email
+        }]);
+        if(insertErr){ console.error('Insert product error', insertErr); alert('Gagal menyimpan metadata produk: '+insertErr.message); return; }
+        alert('Produk berhasil diupload ke Supabase!');
+        // clear form
+        fileInput.value=''; document.getElementById('prod-title').value=''; document.getElementById('prod-price').value=''; document.getElementById('prod-desc').value='';
+        // sync localStorage
+        await syncProductsToLocal();
+      }catch(err){
+        console.error(err); alert('Terjadi kesalahan saat upload'); 
+      }
+    });
+  }
+
+  // Override register/login buttons to use Supabase Auth but keep localStorage mirror for rest of app
+  const btnRegister = document.getElementById('btn-do-register');
+  const btnLogin = document.getElementById('btn-do-login');
+  if(btnRegister){
+    btnRegister.addEventListener('click', async function(){
+      const email = (document.getElementById('login-email').value||'').trim();
+      const pass = (document.getElementById('login-pass').value||'').trim();
+      if(!email||!pass) return alert('Email & password required');
+      const { data, error } = await supabase.auth.signUp({ email, password: pass });
+      if(error){ alert('Register error: '+ error.message); return; }
+      // mirror to localStorage user (simulation used elsewhere in app)
+      const user = { logged:true, email, name: email.split('@')[0], balance:0, isSeller:false };
+      localStorage.setItem('jorsell_user_v1', JSON.stringify(user));
+      document.getElementById('modal')?.classList.remove('show');
+      try{ if(typeof renderProfile === 'function') renderProfile(); } catch(e){}
+      alert('Registrasi berhasil. Jika verifikasi email aktif, cek inbox Anda.');
+      // create users row
+      await supabase.from('users').insert([{ email, name: user.name }], { returning: 'minimal' });
+    });
+  }
+  if(btnLogin){
+    btnLogin.addEventListener('click', async function(){
+      const email = (document.getElementById('login-email').value||'').trim();
+      const pass = (document.getElementById('login-pass').value||'').trim();
+      if(!email||!pass) return alert('Email & password required');
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+      if(error){ alert('Login error: '+ error.message); return; }
+      // Mirror login to localStorage for the app
+      const user = { logged:true, email, name: email.split('@')[0], balance:0, isSeller:false };
+      localStorage.setItem('jorsell_user_v1', JSON.stringify(user));
+      document.getElementById('modal')?.classList.remove('show');
+      try{ if(typeof renderProfile === 'function') renderProfile(); } catch(e){}
+      alert('Login berhasil');
+    });
+  }
+
+  // Also provide a manual "sync" function accessible from console if needed
+  window.jorsellSyncProducts = syncProductsToLocal;
+
+  // when purchases happen in app, original code calls simulatePayment -> it updates downloads locally.
+  // To keep parity, we subscribe to 'products' changes and re-sync when updates occur.
+  try{
+    supabase.channel('public:products').on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, payload=>{
+      // small debounce
+      setTimeout(syncProductsToLocal, 300);
+    }).subscribe();
+  }catch(e){ /* ignore if realtime not permitted */ }
+
+})(); // end IIFE
+</script>
+
+</body>
+</html>
